@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TEAMROHITOFFICIAL45</title>
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+
+body{
+background:#05070f;
+color:white;
+font-family:system-ui;
+padding-bottom:50px;
+}
+
+/* HEADER */
+
+.search-box{
+background:#0b0f1a;
+border:1px solid #1f2a44;
+padding:8px 12px;
+border-radius:20px;
+color:white;
+outline:none;
+}
+
+.search-box:focus{
+border-color:#00ffff;
+box-shadow:0 0 8px #00ffff;
+}
+
+/* CARD */
+
+.match-tile{
+background:#0b0f1a;
+border-radius:28px;
+border:1px solid #1f2a44;
+overflow:hidden;
+transition:.3s;
+display:flex;
+flex-direction:column;
+box-shadow:0 0 10px rgba(0,255,255,0.05);
+}
+
+.match-tile:hover{
+transform:translateY(-6px);
+border-color:#00ffff;
+box-shadow:
+0 0 10px #00ffff,
+0 0 25px #00ffff55;
+}
+
+.img-wrapper{
+height:200px;
+overflow:hidden;
+position:relative;
+}
+
+.match-img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* LIVE */
+
+.live-badge{
+position:absolute;
+top:12px;
+left:12px;
+background:#ff0033;
+font-size:11px;
+font-weight:800;
+padding:4px 12px;
+border-radius:30px;
+}
+
+/* LANGUAGE */
+
+.lang-badge{
+position:absolute;
+bottom:10px;
+right:10px;
+background:#00ffff;
+color:black;
+font-size:11px;
+font-weight:bold;
+padding:3px 8px;
+border-radius:20px;
+}
+
+/* WATCH BUTTON */
+
+.btn-watch{
+background:#00ffff;
+color:black;
+padding:14px;
+border-radius:16px;
+text-align:center;
+font-weight:800;
+cursor:pointer;
+margin-top:auto;
+}
+
+.btn-watch.not-live{
+background:#111827;
+color:#666;
+cursor:not-allowed;
+}
+
+/* MODAL */
+
+.modal-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.9);
+z-index:1000;
+align-items:center;
+justify-content:center;
+}
+
+.modal-content{
+background:#0b0f1a;
+width:90%;
+max-width:350px;
+padding:30px;
+border-radius:25px;
+border:1px solid #1f2a44;
+text-align:center;
+}
+
+.quality-btn{
+background:#111827;
+border:1px solid #1f2a44;
+width:100%;
+padding:15px;
+margin-bottom:10px;
+border-radius:15px;
+font-weight:bold;
+display:flex;
+justify-content:space-between;
+align-items:center;
+cursor:pointer;
+}
+
+.quality-btn:hover{
+background:#00ffff;
+color:black;
+}
+
+.close-btn{
+margin-top:10px;
+color:red;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body class="p-5 max-w-7xl mx-auto">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center mb-10">
+
+<div class="text-2xl font-black">
+⚡ FEMCODE WEB
+</div>
+
+<div class="relative">
+
+<i class="fas fa-search text-xl cursor-pointer text-cyan-400"
+onclick="toggleSearch()"></i>
+
+<input
+type="text"
+id="search"
+placeholder="Search..."
+class="search-box absolute right-0 top-8 hidden w-48"
+/>
+
+</div>
+
+</div>
+
+<!-- MATCHES -->
+
+<div id="matches-container"
+class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+<!-- QUALITY MODAL -->
+
+<div id="quality-modal" class="modal-overlay">
+
+<div class="modal-content">
+
+<h3 class="text-xl font-bold mb-5">Select Quality</h3>
+
+<div id="quality-list"></div>
+
+<div class="close-btn" onclick="closeModal()">CLOSE</div>
+
+</div>
+
+</div>
+
+<script>
+
+const DATA_URL="https://raw.githubusercontent.com/doctor-8trange/zyphx8/refs/heads/main/data/fancode.json";
+
+const PLAYER_URL="https://teamroshaka2.pages.dev/?url=";
+
+const container=document.getElementById("matches-container");
+
+let allMatches=[];
+
+/* INIT */
+
+function initApp(){
+
+fetch(DATA_URL)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+allMatches=data.matches||[];
+
+renderMatches(allMatches);
+
+})
+
+.catch(()=>{
+
+container.innerHTML="<p>Failed to load matches</p>";
+
+});
+
+}
+
+/* RENDER */
+
+function renderMatches(matches){
+
+container.innerHTML="";
+
+matches.forEach((m,index)=>{
+
+const isLive=(m.status||"").toUpperCase()==="LIVE";
+
+const img=m.image_cdn?.APP || m.image || "https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg";
+
+const lang=m.lang || m.language || "MULTI";
+
+const card=document.createElement("div");
+
+card.className="match-tile";
+
+card.innerHTML=`
+
+<div class="img-wrapper">
+
+<img src="${img}" class="match-img">
+
+${isLive?'<span class="live-badge">LIVE</span>':''}
+
+<span class="lang-badge">${lang}</span>
+
+</div>
+
+<div class="p-6 flex flex-col flex-grow">
+
+<h3 class="font-bold text-lg">${m.title}</h3>
+
+<p class="text-gray-400 text-xs mt-2">${m.tournament}</p>
+
+<p class="text-gray-500 text-xs mt-1 mb-5">${m.startTime}</p>
+
+<div onclick="${isLive?`openQuality(${index})`:''}"
+
+class="btn-watch ${!isLive?'not-live':''}">
+
+${isLive?'WATCH LIVE':'NOT LIVE'}
+
+</div>
+
+</div>
+
+`;
+
+container.appendChild(card);
+
+});
+
+}
+
+/* SEARCH */
+
+function toggleSearch(){
+
+const s=document.getElementById("search");
+
+if(s.classList.contains("hidden")){
+s.classList.remove("hidden");
+s.focus();
+}else{
+s.classList.add("hidden");
+}
+
+}
+
+document.getElementById("search").addEventListener("input",function(){
+
+const value=this.value.toLowerCase();
+
+const filtered=allMatches.filter(m=>
+
+(m.title||"").toLowerCase().includes(value) ||
+
+(m.tournament||"").toLowerCase().includes(value)
+
+);
+
+renderMatches(filtered);
+
+});
+
+/* QUALITY */
+
+function openQuality(index){
+
+const match=allMatches[index];
+
+const streamData=match.auto_streams?.[0]?.auto || "";
+
+const list=document.getElementById("quality-list");
+
+list.innerHTML="";
+
+if(!streamData) return alert("Stream not found!");
+
+const lines=streamData.split("\n");
+
+lines.forEach((line,i)=>{
+
+if(line.includes("RESOLUTION=")){
+
+const resolution=line.split("RESOLUTION=")[1].split(",")[0].split("x")[1]+"p";
+
+const url=lines[i+1].trim();
+
+const btn=document.createElement("div");
+
+btn.className="quality-btn";
+
+btn.innerHTML=`<span>${resolution}</span><i class="fas fa-play"></i>`;
+
+btn.onclick=()=>{
+
+window.location.href=PLAYER_URL+encodeURIComponent(url);
+
+};
+
+list.appendChild(btn);
+
+}
+
+});
+
+document.getElementById("quality-modal").style.display="flex";
+
+}
+
+/* CLOSE */
+
+function closeModal(){
+
+document.getElementById("quality-modal").style.display="none";
+
+}
+
+initApp();
+
+</script>
+
+</body>
+</html>
